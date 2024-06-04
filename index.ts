@@ -117,7 +117,7 @@ export const setupPlugin: Plugin<CustomerIoPluginInput>['setupPlugin'] = async (
     console.log('Successfully authenticated with Customer.io. Completing setupPlugin.')
 }
 
-export const onEvent: Plugin<CustomerIoPluginInput>['onEvent'] = async (event, meta) => {
+export const onEventWithPostHogEvent: Plugin<CustomerIoPluginInput>['onEvent'] = async (event, meta) => {
     const { global, config } = meta
     // KLUDGE: This shouldn't even run if setupPlugin failed. Needs to be fixed at the plugin server level
     if (!global.eventNames) {
