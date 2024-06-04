@@ -104,14 +104,14 @@ export const setupPlugin: Plugin<CustomerIoPluginInput>['setupPlugin'] = async (
     const credentialsVerifiedPreviously = await storage.get(global.authorizationHeader, false)
 
     if (credentialsVerifiedPreviously) {
-        console.log('Customer.io credentials verified previously. Completing setupPlugin.')
+        console.log('Customer.io credentials verified previously. Completing setupPlugin. 2')
         return
     }
 
     // See https://www.customer.io/docs/api/#operation/getCioAllowlist
     await callCustomerIoApi('GET', 'api.customer.io', '/v1/api/info/ip_addresses', global.authorizationHeader)
     await storage.set(global.authorizationHeader, true)
-    console.log('Successfully authenticated with Customer.io. Completing setupPlugin.')
+    console.log('Successfully authenticated with Customer.io. Completing setupPlugin. 2')
 }
 
 export const onEventWithPostHogEvent: Plugin<CustomerIoPluginInput>['onEvent'] = async (event, meta) => {
