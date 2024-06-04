@@ -11,7 +11,6 @@ interface CustomerIoPluginInput extends PluginInput {
         customerioSiteId: string
         customerioToken: string
         host?: 'track.customer.io' | 'track-eu.customer.io'
-        identifyByEmail?: 'Yes' | 'No'
         sendEventsFromAnonymousUsers?:
             | 'Send all events'
             | 'Only send events from users with emails'
@@ -22,7 +21,6 @@ interface CustomerIoPluginInput extends PluginInput {
         authorizationHeader: string
         eventNames: string[]
         eventsConfig: EventsConfig
-        identifyByEmail: boolean
     }
 }
 
@@ -102,7 +100,6 @@ export const setupPlugin: Plugin<CustomerIoPluginInput>['setupPlugin'] = async (
         : []
     global.eventsConfig =
         EVENTS_CONFIG_MAP[config.sendEventsFromAnonymousUsers || DEFAULT_SEND_EVENTS_FROM_ANONYMOUS_USERS]
-    global.identifyByEmail = config.identifyByEmail === 'Yes'
 
     const credentialsVerifiedPreviously = await storage.get(global.authorizationHeader, false)
 
@@ -141,7 +138,6 @@ export const onEventWithPostHogEvent: Plugin<CustomerIoPluginInput>['onEvent'] =
         customer,
         global.authorizationHeader,
         config.host || DEFAULT_HOST,
-        global.identifyByEmail
     )
 }
 
@@ -190,7 +186,6 @@ async function exportSingleEvent(
     customer: Customer,
     authorizationHeader: string,
     host: string,
-    identifyByEmail: boolean
 ) {
     // Clean up properties
     if (event.properties) {
@@ -214,17 +209,17 @@ async function exportSingleEvent(
 
     if (customer.email) {
         customerPayload.email = customer.email
-        if (identifyByEmail) {
-            id = customer.email
-        }
     }
 
     // Create or update customer
     // See https://www.customer.io/docs/api/#operation/identify
     await callCustomerIoApi('PUT', host, `/api/v1/customers/${id}`, authorizationHeader, customerPayload)
 
+    console.log({ id, customerPayload })
+
     if (['$identify', '$merge_dangerously'].includes(event.event) && !event.properties.$merge_blocked) {
         const secondaryId = event?.properties?.$anon_distinct_id ?? event?.properties?.alias
+        console.log({ id, secondaryId })
         const mergeUserPayload = { primary : { id }, secondary: { id: secondaryId }}
         await callCustomerIoApi('POST', host, `/api/v1/merge_customers`, authorizationHeader, mergeUserPayload)
     }
