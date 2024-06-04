@@ -121,6 +121,8 @@ export const onEventWithPostHogEvent: Plugin<CustomerIoPluginInput>['onEvent'] =
         throw new RetryError('Cannot run exportEvents because setupPlugin failed!')
     }
 
+    console.debug('stuff is happening')
+
     if (global.eventNames.length !== 0 && !global.eventNames.includes(event.event)) {
         return
     }
